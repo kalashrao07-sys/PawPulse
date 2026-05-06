@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Smart Collar Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── VARIABLES ── */
+:root {
+  --bg:        #070C18;
+  --bg-card:   #0D1525;
+  --bg-card2:  #121C30;
+  --border:    rgba(110,150,220,0.08);
+  --border-md: rgba(110,150,220,0.14);
+  --teal:      #00D4AA;
+  --teal-bg:   rgba(0,212,170,0.09);
+  --teal-bd:   rgba(0,212,170,0.22);
+  --amber:     #FFA840;
+  --amber-bg:  rgba(255,168,64,0.09);
+  --amber-bd:  rgba(255,168,64,0.22);
+  --red:       #FF4560;
+  --red-bg:    rgba(255,69,96,0.09);
+  --red-bd:    rgba(255,69,96,0.22);
+  --green:     #00C97A;
+  --green-bg:  rgba(0,201,122,0.09);
+  --green-bd:  rgba(0,201,122,0.22);
+  --blue:      #4D9FFF;
+  --blue-bg:   rgba(77,159,255,0.09);
+  --txt:       #E4EAF7;
+  --txt2:      #8896B0;
+  --txt3:      #4A5672;
+  --fh:        'Syne', sans-serif;
+  --fb:        'DM Sans', sans-serif;
+  --fm:        'JetBrains Mono', monospace;
+  --r:         14px;
+  --rs:        8px;
+  --rp:        100px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--txt);
+  font-family: var(--fb);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: var(--bg-card2); border-radius: 2px; }
+
+/* ── LAYOUT ── */
+.app { max-width: 760px; margin: 0 auto; padding-bottom: 60px; }
+
+/* ── DEMO BANNER ── */
+.demo-banner {
+  background: var(--amber-bg);
+  border-bottom: 1px solid var(--amber-bd);
+  text-align: center;
+  padding: 8px 16px;
+  font-size: 12px;
+  color: var(--amber);
+  font-family: var(--fm);
+}
+
+/* ── HEADER ── */
+.header {
+  padding: 20px 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.avatar-wrap { position: relative; flex-shrink: 0; }
+
+.avatar {
+  width: 62px; height: 62px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #192845, #0D1A2E);
+  border: 2px solid var(--teal-bd);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; position: relative; z-index: 1;
+}
+
+.avatar-ring {
+  position: absolute; inset: -5px;
+  border-radius: 50%;
+  border: 1.5px solid var(--teal);
+  opacity: 0.35;
+  animation: ring-pulse 3s ease-in-out infinite;
+}
+
+@keyframes ring-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.35; }
+  50% { transform: scale(1.09); opacity: 0.10; }
+}
+
+.online-dot {
+  position: absolute; bottom: 1px; right: 1px;
+  width: 13px; height: 13px;
+  background: var(--green);
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  z-index: 2;
+}
+.online-dot::after {
+  content: '';
+  position: absolute; inset: -3px;
+  border-radius: 50%;
+  background: var(--green);
+  opacity: 0.35;
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+
+@keyframes dot-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.35; }
+  50%       { transform: scale(1.7); opacity: 0; }
+}
+
+.hdr-info { flex: 1; min-width: 0; }
+
+.dog-name {
+  font-family: var(--fh);
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.dog-meta {
+  font-size: 13px;
+  color: var(--txt2);
+  margin-top: 1px;
+}
+
+.collar-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--teal-bg);
+  border: 1px solid var(--teal-bd);
+  border-radius: var(--rp);
+  padding: 3px 10px;
+  font-family: var(--fm);
+  font-size: 11px;
+  color: var(--teal);
+  margin-top: 6px;
+}
+
+.chip-dot {
+  width: 5px; height: 5px;
+  background: var(--teal);
+  border-radius: 50%;
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+
+/* ── TABS ── */
+.tab-nav {
+  display: flex;
+  margin: 18px 20px 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 4px;
+  gap: 3px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 9px 6px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--txt2);
+  font-family: var(--fb);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.tab-btn:hover { color: var(--txt); background: var(--bg-card2); }
+.tab-btn.active {
+  background: var(--teal-bg);
+  border-color: var(--teal-bd);
+  color: var(--teal);
+}
+
+/* ── PANELS ── */
+.panel { display: none; padding: 14px 20px; }
+.panel.active { display: block; animation: fade-up 0.22s ease; }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  margin-bottom: 10px;
+}
+
+.sec-label {
+  font-family: var(--fh);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--txt3);
+  margin: 16px 0 8px;
+}
+.sec-label:first-child { margin-top: 0; }
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.card-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--txt2);
+}
+
+/* BADGES */
+.badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: var(--rp);
+  border: 1px solid;
+}
+.b-teal   { background: var(--teal-bg);  color: var(--teal);  border-color: var(--teal-bd); }
+.b-green  { background: var(--green-bg); color: var(--green); border-color: var(--green-bd); }
+.b-amber  { background: var(--amber-bg); color: var(--amber); border-color: var(--amber-bd); }
+.b-red    { background: var(--red-bg);   color: var(--red);   border-color: var(--red-bd); }
+.b-gray   { background: rgba(110,150,220,0.06); color: var(--txt2); border-color: var(--border-md); }
+
+/* STAT ROWS */
+.srow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.srow:last-child { border-bottom: none; }
+.slabel { color: var(--txt2); font-size: 13px; }
+.sval { font-weight: 500; text-align: right; }
+
+.divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+/* TAGS */
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: var(--rp);
+  background: var(--bg-card2);
+  border: 1px solid var(--border-md);
+  color: var(--txt2);
+}
+
+/* MINI STATS (4-grid) */
+.g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
+.mstat {
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  padding: 10px 8px;
+  text-align: center;
+}
+.mstat-val { font-family: var(--fm); font-size: 17px; font-weight: 500; color: var(--teal); }
+.mstat-lbl { font-size: 10px; color: var(--txt3); margin-top: 2px; }
+
+/* ── SENSOR CARDS ── */
+.sc {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  margin-bottom: 10px;
+  transition: border-color 0.3s;
+}
+.sc.live { border-color: var(--teal-bd); }
+
+.sc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.sc-icon-name { display: flex; align-items: center; gap: 10px; }
+
+.sc-icon {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.ic-pulse  { background: rgba(255,69,96,0.12); }
+.ic-temp   { background: rgba(255,168,64,0.12); }
+.ic-breath { background: rgba(0,212,170,0.12); }
+.ic-hydro  { background: rgba(77,159,255,0.12); }
+.ic-act    { background: rgba(139,92,246,0.12); }
+
+.sc-name   { font-family: var(--fh); font-size: 15px; font-weight: 600; }
+.sc-desc   { font-size: 12px; color: var(--txt3); }
+
+.toggle {
+  padding: 7px 14px;
+  border-radius: var(--rp);
+  border: 1px solid var(--border-md);
+  background: transparent;
+  color: var(--txt2);
+  font-family: var(--fb);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.toggle:hover  { background: var(--bg-card2); color: var(--txt); }
+.toggle.on     { background: var(--teal-bg);  border-color: var(--teal-bd);  color: var(--teal); }
+.toggle.off    { background: var(--red-bg);   border-color: var(--red-bd);   color: var(--red);  }
+
+.sc-idle { font-size: 12px; color: var(--txt3); }
+.sc-data { margin-top: 10px; }
+
+/* BIG VALUE */
+.bv-wrap { display: flex; align-items: baseline; gap: 5px; }
+.bv {
+  font-family: var(--fm);
+  font-size: 44px;
+  font-weight: 500;
+  line-height: 1;
+}
+.bv-unit { font-size: 16px; color: var(--txt2); }
+.bv-status { font-size: 12px; margin-top: 4px; }
+
+/* ECG canvas */
+.ecg {
+  width: 100%;
+  height: 68px;
+  border-radius: var(--rs);
+  background: rgba(0,212,170,0.03);
+  border: 1px solid rgba(0,212,170,0.07);
+  display: block;
+  margin-top: 10px;
+}
+
+/* TEMP BAR */
+.temp-bar-wrap { margin-top: 12px; }
+.temp-track {
+  height: 6px;
+  background: var(--bg-card2);
+  border-radius: 3px;
+  position: relative;
+  overflow: visible;
+}
+.temp-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(to right, #4D9FFF 0%, #00D4AA 35%, #FFA840 65%, #FF4560 100%);
+  width: 100%;
+}
+.temp-thumb {
+  position: absolute;
+  top: -5px;
+  width: 16px; height: 16px;
+  background: var(--amber);
+  border: 2.5px solid var(--bg);
+  border-radius: 50%;
+  transform: translateX(-50%);
+  transition: left 0.6s ease;
+  pointer-events: none;
+}
+.temp-scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-family: var(--fm);
+  font-size: 10px;
+  color: var(--txt3);
+}
+
+/* ACTIVITY */
+.act-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--txt2);
+}
+.act-val { font-family: var(--fm); font-size: 14px; color: var(--txt); font-weight: 500; }
+.act-track {
+  height: 8px;
+  background: var(--bg-card2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.act-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(to right, #8B5CF6, #00D4AA);
+  transition: width 1.2s ease;
+}
+.act-sub {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--txt3);
+}
+
+/* CARD FOOTER */
+.cfoot {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--txt3);
+  font-family: var(--fm);
+  display: flex;
+  justify-content: space-between;
+}
+
+/* BREATHING */
+.breath-row { display: flex; align-items: center; gap: 16px; margin-top: 10px; }
+.breath-circle {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  border: 2px solid var(--teal-bd);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--fm);
+  font-size: 11px;
+  color: var(--teal);
+  flex-shrink: 0;
+}
+.breath-circle.go {
+  animation: breath 4s ease-in-out infinite;
+}
+@keyframes breath {
+  0%, 100% { transform: scale(1); border-color: var(--teal-bd); }
+  50%       { transform: scale(1.28); border-color: var(--teal); }
+}
+
+/* HYDRATION */
+.hyd-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 11px;
+  border-radius: var(--rs);
+  border: 1px dashed var(--border-md);
+  background: transparent;
+  color: var(--txt2);
+  font-family: var(--fb);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.hyd-btn:hover { background: var(--bg-card2); border-style: solid; color: var(--txt); }
+
+.hyd-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--rs);
+  background: var(--bg-card2);
+  margin-top: 10px;
+  border: 1px solid var(--border);
+}
+.hyd-icon  { font-size: 26px; }
+.hyd-name  { font-family: var(--fh); font-size: 17px; font-weight: 700; }
+.hyd-hint  { font-size: 12px; color: var(--txt2); margin-top: 2px; }
+
+/* ── TAB 3: STATUS ── */
+.status-hero {
+  text-align: center;
+  padding: 26px 20px;
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.status-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  opacity: 0.06;
+  border-radius: var(--r);
+}
+.sh-healthy::before { background: var(--green); }
+.sh-healthy { border-color: var(--green-bd); }
+.sh-monitor::before { background: var(--teal); }
+.sh-monitor { border-color: var(--teal-bd); }
+.sh-warning::before { background: var(--amber); }
+.sh-warning { border-color: var(--amber-bd); }
+.sh-critical::before { background: var(--red); }
+.sh-critical { border-color: var(--red-bd); }
+
+.sl {
+  font-family: var(--fh);
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  position: relative;
+}
+.sl-healthy  { color: var(--green); }
+.sl-monitor  { color: var(--teal); }
+.sl-warning  { color: var(--amber); }
+.sl-critical { color: var(--red); }
+
+.sh-sub  { font-size: 14px; color: var(--txt2); margin-top: 4px; position: relative; }
+.sh-time { font-family: var(--fm); font-size: 11px; color: var(--txt3); margin-top: 6px; position: relative; }
+
+/* METRIC GRID */
+.mgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.mcard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  padding: 12px;
+}
+.mcard-icon  { font-size: 18px; margin-bottom: 5px; }
+.mcard-name  { font-size: 12px; color: var(--txt2); margin-bottom: 3px; }
+.mcard-val   { font-family: var(--fm); font-size: 14px; font-weight: 500; }
+.mv-ok   { color: var(--green); }
+.mv-warn { color: var(--amber); }
+.mv-crit { color: var(--red); }
+.mv-na   { color: var(--txt3); }
+.mbar-track { height: 3px; background: var(--bg-card2); border-radius: 2px; margin-top: 6px; }
+.mbar-fill  { height: 100%; border-radius: 2px; transition: width 1s ease; }
+.mb-ok   { background: var(--green); }
+.mb-warn { background: var(--amber); }
+.mb-crit { background: var(--red); }
+.mb-na   { background: var(--txt3); }
+
+/* NGO SUMMARY */
+.summary { font-size: 14px; color: var(--txt); line-height: 1.8; }
+
+/* ALERT LOG */
+.alert-item {
+  display: flex;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+.alert-item:last-child { border-bottom: none; }
+.al-dot  { width: 7px; height: 7px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+.al-msg  { font-size: 13px; color: var(--txt); }
+.al-time { font-family: var(--fm); font-size: 11px; color: var(--txt3); margin-top: 2px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 480px) {
+  .dog-name { font-size: 18px; }
+  .bv { font-size: 36px; }
+  .sl { font-size: 28px; }
+  .g4 { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── UTILITIES ── */
+.tc { color: var(--teal); }
+.ta { color: var(--amber); }
+.tr { color: var(--red); }
+.tg { color: var(--green); }
+.t2 { color: var(--txt2); }
+.t3 { color: var(--txt3); }
+.mono { font-family: var(--fm); }
+
+  </style>
+</head>
+<body>
+<div class="app">
+
+<!-- DEMO BANNER -->
+<div class="demo-banner" id="demo-banner">
+  ⚡ Demo Mode — Replace SUPABASE_URL &amp; SUPABASE_KEY in the &lt;script&gt; to connect your collar
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="avatar-wrap">
+    <div class="avatar">🐕</div>
+    <div class="avatar-ring"></div>
+    <div class="online-dot"></div>
+  </div>
+  <div class="hdr-info">
+    <div class="dog-name" id="dn">Bhairav</div>
+    <div class="dog-meta" id="dm">Indian Pariah Dog · Male · ~3 yrs</div>
+    <div class="collar-chip">
+      <div class="chip-dot"></div>
+      <span id="did">DOG001</span>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('about')">📋 About</button>
+  <button class="tab-btn"        onclick="showTab('live')">💓 Live Health</button>
+  <button class="tab-btn"        onclick="showTab('status')">🩺 Status</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     TAB 1 — ABOUT
+════════════════════════════════════════════ -->
+<div id="tab-about" class="panel active">
+
+  <div class="sec-label">General Information</div>
+  <div class="card">
+    <div class="srow"><span class="slabel">Name / ID</span>   <span class="sval mono">Bhairav <span class="t3">#DOG001</span></span></div>
+    <div class="srow"><span class="slabel">Breed</span>       <span class="sval">Indian Pariah Dog</span></div>
+    <div class="srow"><span class="slabel">Age</span>          <span class="sval">~3 Years</span></div>
+    <div class="srow"><span class="slabel">Gender</span>       <span class="sval">Male (Neutered)</span></div>
+    <div class="srow"><span class="slabel">Weight</span>       <span class="sval">~18 kg</span></div>
+    <div class="srow"><span class="slabel">Intake Date</span>  <span class="sval mono t2">14 Mar 2024</span></div>
+    <div class="srow"><span class="slabel">Location</span>     <span class="sval">HSR Layout, Bengaluru</span></div>
+    <div class="divider"></div>
+    <div style="font-size:13px;color:var(--txt2);line-height:1.75">
+      Found near HSR Layout. Friendly, social dog — good with humans and other dogs.
+      Has been with the colony ~2 years. Regular feeder: Mrs. Lakshmi (resident, Block 4).
+    </div>
+  </div>
+
+  <div class="g4">
+    <div class="mstat"><div class="mstat-val tg">✓</div><div class="mstat-lbl">Vaccinated</div></div>
+    <div class="mstat"><div class="mstat-val tg">✓</div><div class="mstat-lbl">Neutered</div></div>
+    <div class="mstat"><div class="mstat-val" style="color:var(--green)">Low</div><div class="mstat-lbl">Risk Level</div></div>
+    <div class="mstat"><div class="mstat-val" style="color:var(--amber)">★★★★</div><div class="mstat-lbl">Adoptable</div></div>
+  </div>
+
+  <div class="sec-label">Medical History</div>
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">Vaccinations</span>
+      <span class="badge b-green">Up to date</span>
+    </div>
+    <div class="srow"><span class="slabel">Rabies</span>             <span class="sval mono t2">Jan 2024</span></div>
+    <div class="srow"><span class="slabel">DHPPiL (5-in-1)</span>   <span class="sval mono t2">Jan 2024</span></div>
+    <div class="srow"><span class="slabel">Next Booster Due</span>   <span class="sval ta">Jan 2025</span></div>
+    <div class="divider"></div>
+    <div class="card-head" style="margin-bottom:8px">
+      <span class="card-title">Past Treatments</span>
+    </div>
+    <div class="srow"><span class="slabel">Mange (Demodex)</span>   <span class="sval"><span class="badge b-teal">Completed</span></span></div>
+    <div class="srow"><span class="slabel">Deworming</span>          <span class="sval mono t2">Mar 2024</span></div>
+    <div class="srow"><span class="slabel">Tick & Flea</span>        <span class="sval mono t2">Feb 2024</span></div>
+    <div class="divider"></div>
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--txt3);margin-bottom:8px">Known Conditions & Allergies</div>
+    <div class="tags"><span class="tag t2">None known</span></div>
+  </div>
+
+  <div class="sec-label">Behavioral Traits</div>
+  <div class="card">
+    <div class="srow"><span class="slabel">Temperament</span>        <span class="sval">Calm, friendly</span></div>
+    <div class="srow"><span class="slabel">Response to strangers</span><span class="sval">Approachable</span></div>
+    <div class="srow"><span class="slabel">Child friendly</span>     <span class="sval tg">Yes</span></div>
+    <div class="srow"><span class="slabel">Dog friendly</span>       <span class="sval tg">Yes</span></div>
+    <div class="srow"><span class="slabel">Energy level</span>       <span class="sval">Moderate</span></div>
+    <div class="divider"></div>
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--txt3);margin-bottom:8px">Favourite Activities</div>
+    <div class="tags">
+      <span class="tag">Morning walks</span>
+      <span class="tag">Fetch</span>
+      <span class="tag">Socialising</span>
+      <span class="tag">Napping in sun</span>
+    </div>
+  </div>
+
+  <div class="sec-label">Caregiver & Community</div>
+  <div class="card">
+    <div class="srow"><span class="slabel">Organisation</span>   <span class="sval">Animal Aid Society, BLR</span></div>
+    <div class="srow"><span class="slabel">Primary Vet</span>    <span class="sval">Dr. Priya Sharma</span></div>
+    <div class="srow"><span class="slabel">Caregiver Phone</span><span class="sval mono tc">+91 98765 43210</span></div>
+    <div class="srow"><span class="slabel">Community Feeder</span><span class="sval">Mrs. Lakshmi</span></div>
+    <div class="srow"><span class="slabel">Feeding Time</span>  <span class="sval">7:00 AM · 6:30 PM</span></div>
+  </div>
+
+  <div class="sec-label">Emergency & Risk</div>
+  <div class="card" style="border-color:var(--red-bd)">
+    <div class="srow"><span class="slabel">Emergency Vet</span>  <span class="sval tr">+91 98765 43210</span></div>
+    <div class="srow"><span class="slabel">Known Risks</span>    <span class="sval ta">Skittish near loud noises</span></div>
+    <div class="srow"><span class="slabel">Blood Group</span>    <span class="sval t2 mono">DEA 1.1+</span></div>
+    <div class="srow"><span class="slabel">Microchip ID</span>   <span class="sval t2 mono">IND-2024-BLR-001</span></div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TAB 2 — LIVE HEALTH
+════════════════════════════════════════════ -->
+<div id="tab-live" class="panel">
+
+  <!-- Activity (always on) -->
+  <div class="sc live">
+    <div class="sc-head">
+      <div class="sc-icon-name">
+        <div class="sc-icon ic-act">🏃</div>
+        <div>
+          <div class="sc-name">Activity Monitor</div>
+          <div class="sc-desc">Background · Always active · Low-power at night</div>
+        </div>
+      </div>
+      <span class="badge b-teal">LIVE</span>
+    </div>
+    <div class="act-row">
+      <span>Activity level</span>
+      <span class="act-val" id="act-label">MODERATE</span>
+    </div>
+    <div class="act-track">
+      <div class="act-fill" id="act-bar" style="width:55%"></div>
+    </div>
+    <div class="act-sub">
+      <span>Low</span>
+      <span class="mono" id="act-steps">~420 movements today</span>
+      <span>High</span>
+    </div>
+    <div class="cfoot">
+      <span>Mode: Daytime · 5-sec sample</span>
+      <span id="act-time">just now</span>
+    </div>
+  </div>
+
+  <!-- Pulse -->
+  <div class="sc" id="pc">
+    <div class="sc-head">
+      <div class="sc-icon-name">
+        <div class="sc-icon ic-pulse">❤️</div>
+        <div>
+          <div class="sc-name">Pulse Monitor</div>
+          <div class="sc-desc">On-demand · MAX30102 / Analog</div>
+        </div>
+      </div>
+      <button class="toggle" id="pbtn" onclick="toggleSensor('pulse')">Start</button>
+    </div>
+    <div class="sc-idle" id="p-idle">Tap Start to read heart rate from collar sensor.</div>
+    <div class="sc-data" id="p-data" style="display:none">
+      <div class="bv-wrap">
+        <span class="bv" id="p-val">—</span>
+        <span class="bv-unit">BPM</span>
+      </div>
+      <div class="bv-status" id="p-status"></div>
+      <canvas class="ecg" id="ecg"></canvas>
+    </div>
+  </div>
+
+  <!-- Temperature -->
+  <div class="sc" id="tc">
+    <div class="sc-head">
+      <div class="sc-icon-name">
+        <div class="sc-icon ic-temp">🌡️</div>
+        <div>
+          <div class="sc-name">Temperature</div>
+          <div class="sc-desc">On-demand · DS18B20</div>
+        </div>
+      </div>
+      <button class="toggle" id="tbtn" onclick="toggleSensor('temp')">Start</button>
+    </div>
+    <div class="sc-idle" id="t-idle">Tap Start to read body temperature from collar.</div>
+    <div class="sc-data" id="t-data" style="display:none">
+      <div class="bv-wrap">
+        <span class="bv" id="t-val">—</span>
+        <span class="bv-unit">°C</span>
+      </div>
+      <div class="bv-status" id="t-status"></div>
+      <div class="temp-bar-wrap">
+        <div class="temp-track">
+          <div class="temp-fill"></div>
+          <div class="temp-thumb" id="t-thumb" style="left:45%"></div>
+        </div>
+        <div class="temp-scale">
+          <span>35°</span><span>36.5°</span><span>38°</span><span>39.5°</span><span>41°</span><span>42°</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Breathing -->
+  <div class="sc" id="bc">
+    <div class="sc-head">
+      <div class="sc-icon-name">
+        <div class="sc-icon ic-breath">🫁</div>
+        <div>
+          <div class="sc-name">Breathing Rate</div>
+          <div class="sc-desc">Optional · MPU6050-based</div>
+        </div>
+      </div>
+      <button class="toggle" id="bbtn" onclick="toggleSensor('breath')">Start</button>
+    </div>
+    <div class="sc-idle" id="b-idle">Tap Start to estimate breathing via accelerometer.</div>
+    <div class="sc-data" id="b-data" style="display:none">
+      <div class="breath-row">
+        <div class="breath-circle go" id="b-circle">inhale</div>
+        <div>
+          <div class="bv-wrap">
+            <span class="bv" style="font-size:34px" id="b-val">—</span>
+            <span class="bv-unit">/min</span>
+          </div>
+          <div class="bv-status" id="b-status"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hydration -->
+  <div class="sc" id="hc">
+    <div class="sc-head">
+      <div class="sc-icon-name">
+        <div class="sc-icon ic-hydro">💧</div>
+        <div>
+          <div class="sc-name">Hydration Status</div>
+          <div class="sc-desc">Calculated · temp + activity + pulse</div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--txt2);line-height:1.65">
+      Estimated from recent activity level, temperature reading, and pulse (if available).
+      No continuous tracking — only calculated on demand.
+    </div>
+    <button class="hyd-btn" onclick="calcHydration()">💧 Calculate Hydration Status</button>
+    <div id="hyd-result" style="display:none">
+      <div class="hyd-result">
+        <div class="hyd-icon" id="hyd-icon">💧</div>
+        <div>
+          <div class="hyd-name" id="hyd-name">—</div>
+          <div class="hyd-hint" id="hyd-hint"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="font-size:11px;color:var(--txt3);text-align:center;margin-top:4px;font-family:var(--fm)">
+    All readings pushed to Supabase live_data in real-time
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TAB 3 — HEALTH STATUS
+════════════════════════════════════════════ -->
+<div id="tab-status" class="panel">
+
+  <div class="status-hero sh-healthy" id="sh">
+    <div class="sl sl-healthy" id="sl">HEALTHY</div>
+    <div class="sh-sub" id="sh-sub">All monitored vitals within normal range</div>
+    <div class="sh-time" id="sh-time">Last updated: —</div>
+  </div>
+
+  <div class="sec-label">Individual Metrics</div>
+  <div class="mgrid">
+    <div class="mcard">
+      <div class="mcard-icon">❤️</div>
+      <div class="mcard-name">Heart Rate</div>
+      <div class="mcard-val mv-na" id="m-pulse">No data</div>
+      <div class="mbar-track"><div class="mbar-fill mb-na" id="mb-pulse" style="width:0%"></div></div>
+    </div>
+    <div class="mcard">
+      <div class="mcard-icon">🌡️</div>
+      <div class="mcard-name">Temperature</div>
+      <div class="mcard-val mv-na" id="m-temp">No data</div>
+      <div class="mbar-track"><div class="mbar-fill mb-na" id="mb-temp" style="width:0%"></div></div>
+    </div>
+    <div class="mcard">
+      <div class="mcard-icon">🏃</div>
+      <div class="mcard-name">Activity</div>
+      <div class="mcard-val mv-ok" id="m-act">MODERATE</div>
+      <div class="mbar-track"><div class="mbar-fill mb-ok" id="mb-act" style="width:55%"></div></div>
+    </div>
+    <div class="mcard">
+      <div class="mcard-icon">💧</div>
+      <div class="mcard-name">Hydration</div>
+      <div class="mcard-val mv-na" id="m-hyd">Not checked</div>
+      <div class="mbar-track"><div class="mbar-fill mb-na" id="mb-hyd" style="width:0%"></div></div>
+    </div>
+    <div class="mcard">
+      <div class="mcard-icon">🫁</div>
+      <div class="mcard-name">Breathing</div>
+      <div class="mcard-val mv-na" id="m-breath">No data</div>
+      <div class="mbar-track"><div class="mbar-fill mb-na" id="mb-breath" style="width:0%"></div></div>
+    </div>
+    <div class="mcard">
+      <div class="mcard-icon">🔔</div>
+      <div class="mcard-name">Alerts</div>
+      <div class="mcard-val mv-ok" id="m-alerts">None</div>
+      <div class="mbar-track"><div class="mbar-fill mb-ok" id="mb-alerts" style="width:5%"></div></div>
+    </div>
+  </div>
+
+  <div class="sec-label">Summary for NGO / Vet</div>
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">Assessment</span>
+      <span class="badge b-gray mono" id="summary-badge">DOG001</span>
+    </div>
+    <div class="summary" id="ngo-summary">
+      Bhairav (DOG001) is currently in stable condition. Activity levels are normal for the time of day.
+      No live vital readings have been taken this session — use the Live Health tab to collect data.
+      No alerts triggered. Suitable for adoption screening.
+    </div>
+    <div class="cfoot">
+      <span>Smart Collar v1.0 · Bengaluru</span>
+      <span id="summary-ts" class="mono">—</span>
+    </div>
+  </div>
+
+  <div class="sec-label">Alert Log</div>
+  <div class="card" id="alert-log">
+    <div class="alert-item">
+      <div class="al-dot" style="background:var(--green)"></div>
+      <div>
+        <div class="al-msg">System online — collar connected</div>
+        <div class="al-time" id="session-start-el">Session start: —</div>
+      </div>
+    </div>
+    <div class="alert-item" id="alert-placeholder">
+      <div class="al-dot" style="background:var(--txt3)"></div>
+      <div>
+        <div class="al-msg t2">No anomalies detected this session</div>
+        <div class="al-time">Monitoring in progress…</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div><!-- end .app -->
+
+<script>
+/* ════════════════════════════════════════════
+   CONFIGURATION — fill in your values
+════════════════════════════════════════════ */
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const DOG_ID = new URLSearchParams(window.location.search).get('id') || 'DOG001';
+const DEMO = (SUPABASE_URL === 'YOUR_SUPABASE_URL');
+
+/*
+  ══════════════════════════════════════════
+  SUPABASE TABLE STRUCTURE (run in SQL editor)
+  ══════════════════════════════════════════
+
+  -- Dog static profile
+  CREATE TABLE dogs (
+    id TEXT PRIMARY KEY,
+    name TEXT, breed TEXT, age TEXT, gender TEXT,
+    weight TEXT, description TEXT, intake_date DATE,
+    neutered BOOLEAN DEFAULT false
+  );
+
+  -- Sensor control (ESP32 polls this)
+  CREATE TABLE live_control (
+    dog_id TEXT PRIMARY KEY REFERENCES dogs(id),
+    pulse_active   BOOLEAN DEFAULT false,
+    temp_active    BOOLEAN DEFAULT false,
+    breath_active  BOOLEAN DEFAULT false,
+    buzzer_alert   BOOLEAN DEFAULT false,
+    led_alert      BOOLEAN DEFAULT false,
+    updated_at     TIMESTAMPTZ DEFAULT NOW()
+  );
+
+  -- Live sensor data (ESP32 writes here)
+  CREATE TABLE live_data (
+    dog_id         TEXT PRIMARY KEY REFERENCES dogs(id),
+    pulse_bpm      INT,
+    temperature    FLOAT,
+    breathing_rate INT,
+    activity_level TEXT,    -- 'LOW' | 'MODERATE' | 'HIGH'
+    activity_count INT,
+    updated_at     TIMESTAMPTZ DEFAULT NOW()
+  );
+
+  -- Enable Realtime on live_data
+  ALTER PUBLICATION supabase_realtime ADD TABLE live_data;
+*/
+
+/* ════════════════════════════════════════════
+   SUPABASE INIT
+════════════════════════════════════════════ */
+let SB = null;
+
+if (!DEMO) {
+  SB = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  document.getElementById('demo-banner').style.display = 'none';
+  loadFromSupabase();
+}
+
+document.getElementById('did').textContent = DOG_ID;
+
+async function loadFromSupabase() {
+  try {
+    // Load dog profile
+    const { data: dog } = await SB.from('dogs').select('*').eq('id', DOG_ID).single();
+    if (dog) {
+      document.getElementById('dn').textContent = dog.name || DOG_ID;
+      if (dog.breed) document.getElementById('dm').textContent =
+        `${dog.breed} · ${dog.gender || ''} · ${dog.age || ''}`;
+    }
+
+    // Load latest live data
+    const { data: live } = await SB.from('live_data').select('*').eq('dog_id', DOG_ID).single();
+    if (live) applyLiveData(live);
+
+    // Subscribe to real-time live_data changes
+    SB.channel(`live_${DOG_ID}`)
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'live_data',
+        filter: `dog_id=eq.${DOG_ID}`
+      }, payload => applyLiveData(payload.new))
+      .subscribe();
+
+  } catch(e) { console.warn('[Supabase]', e); }
+}
+
+function applyLiveData(d) {
+  if (d.pulse_bpm      != null) updateValue('pulse',  d.pulse_bpm);
+  if (d.temperature    != null) updateValue('temp',   d.temperature);
+  if (d.breathing_rate != null) updateValue('breath', d.breathing_rate);
+  if (d.activity_level) {
+    document.getElementById('act-label').textContent = d.activity_level;
+    const pct = { LOW: 20, MODERATE: 55, HIGH: 88 }[d.activity_level] || 55;
+    document.getElementById('act-bar').style.width = pct + '%';
+    if (d.activity_count) document.getElementById('act-steps').textContent =
+      `~${d.activity_count} movements today`;
+  }
+}
+
+/* ════════════════════════════════════════════
+   TAB SWITCHING
+════════════════════════════════════════════ */
+function showTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  const idx = { about: 0, live: 1, status: 2 };
+  document.querySelectorAll('.tab-btn')[idx[id]].classList.add('active');
+}
+
+/* ════════════════════════════════════════════
+   SENSOR STATE
+════════════════════════════════════════════ */
+const SS = {
+  pulse:  { on: false, iv: null, last: null },
+  temp:   { on: false, iv: null, last: null },
+  breath: { on: false, iv: null, last: null },
+};
+
+async function toggleSensor(type) {
+  const s = SS[type];
+  s.on = !s.on;
+
+  const btn  = document.getElementById(type[0] + 'btn');
+  const data = document.getElementById(type[0] + '-data');
+  const idle = document.getElementById(type[0] + '-idle');
+  const card = document.getElementById(type[0] + 'c');
+
+  if (s.on) {
+    btn.textContent = 'Stop';
+    btn.className = 'toggle off';
+    data.style.display = 'block';
+    idle.style.display = 'none';
+    card.classList.add('live');
+
+    if (!DEMO) await SB.from('live_control')
+      .upsert({ dog_id: DOG_ID, [`${type}_active`]: true, updated_at: new Date().toISOString() });
+
+    startSim(type);
+  } else {
+    btn.textContent = 'Start';
+    btn.className = 'toggle';
+    card.classList.remove('live');
+    if (s.iv) { clearInterval(s.iv); s.iv = null; }
+    if (type === 'pulse') stopECG();
+
+    if (!DEMO) await SB.from('live_control')
+      .upsert({ dog_id: DOG_ID, [`${type}_active`]: false, updated_at: new Date().toISOString() });
+  }
+}
+
+function simVal(type) {
+  if (type === 'pulse')  return Math.round(72 + Math.random() * 18);
+  if (type === 'temp')   return +(38.1 + Math.random() * 0.9).toFixed(1);
+  if (type === 'breath') return Math.round(16 + Math.random() * 8);
+}
+
+function startSim(type) {
+  updateValue(type, simVal(type));
+  SS[type].iv = setInterval(() => {
+    if (!SS[type].on) return;
+    const v = simVal(type);
+    updateValue(type, v);
+
+    if (!DEMO) {
+      const row = { dog_id: DOG_ID, updated_at: new Date().toISOString() };
+      if (type === 'pulse')  row.pulse_bpm      = v;
+      if (type === 'temp')   row.temperature    = v;
+      if (type === 'breath') row.breathing_rate = v;
+      SB.from('live_data').upsert(row, { onConflict: 'dog_id' });
+    }
+  }, 3500);
+
+  if (type === 'pulse') startECG();
+}
+
+/* ════════════════════════════════════════════
+   VALUE DISPLAY & STATUS LOGIC
+════════════════════════════════════════════ */
+function updateValue(type, val) {
+  SS[type === 'pulse' ? 'pulse' : type === 'temp' ? 'temp' : 'breath'].last = val;
+
+  if (type === 'pulse') {
+    document.getElementById('p-val').textContent = val;
+    const ok = val >= 60 && val <= 140, hi = val > 140 && val <= 160;
+    const cls = ok ? 'tg' : hi ? 'ta' : 'tr';
+    const lbl = ok ? '✓ Normal (60–140 BPM)' : hi ? '⚠ Slightly elevated' : '⚠ Abnormal — contact vet';
+    document.getElementById('p-status').innerHTML = `<span class="${cls}">${lbl}</span>`;
+    setMetric('pulse', val + ' BPM', ok ? 'ok' : hi ? 'warn' : 'crit', Math.min(100, Math.round(val / 200 * 100)));
+    checkAlert('pulse', val, ok, hi);
+  }
+
+  if (type === 'temp') {
+    document.getElementById('t-val').textContent = val;
+    const ok = val >= 38.0 && val <= 39.2, hi = val > 39.2 && val <= 40.0;
+    const cls = ok ? 'tg' : hi ? 'ta' : 'tr';
+    const lbl = ok ? '✓ Normal (38.0–39.2°C)' : hi ? '⚠ Mild fever' : '⚠ High fever — vet needed';
+    document.getElementById('t-status').innerHTML = `<span class="${cls}">${lbl}</span>`;
+    const pct = Math.min(100, Math.max(0, ((val - 35) / 7) * 100));
+    document.getElementById('t-thumb').style.left = pct + '%';
+    setMetric('temp', val + '°C', ok ? 'ok' : hi ? 'warn' : 'crit', pct);
+    checkAlert('temp', val, ok, hi);
+  }
+
+  if (type === 'breath') {
+    document.getElementById('b-val').textContent = val;
+    const ok = val >= 15 && val <= 30;
+    const cls = ok ? 'tg' : 'ta';
+    const lbl = ok ? '✓ Normal (15–30/min)' : '⚠ Outside normal range';
+    document.getElementById('b-status').innerHTML = `<span class="${cls}">${lbl}</span>`;
+    const dur = (60 / val).toFixed(1);
+    document.getElementById('b-circle').style.animationDuration = dur + 's';
+    setMetric('breath', val + '/min', ok ? 'ok' : 'warn', Math.min(100, Math.round(val / 50 * 100)));
+  }
+
+  recalcOverall();
+}
+
+/* ════════════════════════════════════════════
+   ECG CANVAS ANIMATION
+════════════════════════════════════════════ */
+let ecgCtx, ecgRAF, ecgT = 0;
+
+function ecgVal(t) {
+  t = ((t % 1) + 1) % 1;
+  let v = 0;
+  if (t > 0.10 && t < 0.22) v += Math.sin((t - 0.10) / 0.12 * Math.PI) * 0.13;
+  if (t > 0.30 && t < 0.34) v -= Math.sin((t - 0.30) / 0.04 * Math.PI) * 0.18;
+  if (t > 0.32 && t < 0.40) v += Math.sin((t - 0.32) / 0.08 * Math.PI) * 1.00;
+  if (t > 0.38 && t < 0.43) v -= Math.sin((t - 0.38) / 0.05 * Math.PI) * 0.28;
+  if (t > 0.52 && t < 0.74) v += Math.sin((t - 0.52) / 0.22 * Math.PI) * 0.22;
+  return v;
+}
+
+function startECG() {
+  const canvas = document.getElementById('ecg');
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width  = canvas.offsetWidth  * dpr;
+  canvas.height = canvas.offsetHeight * dpr;
+  ecgCtx = canvas.getContext('2d');
+  ecgCtx.scale(dpr, dpr);
+  drawECG();
+}
+
+function drawECG() {
+  const canvas = document.getElementById('ecg');
+  if (!canvas || !ecgCtx) return;
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  const mid = H / 2, amp = H * 0.38;
+
+  ecgCtx.clearRect(0, 0, W, H);
+
+  ecgCtx.strokeStyle = '#00D4AA';
+  ecgCtx.lineWidth = 1.5;
+  ecgCtx.shadowBlur = 7;
+  ecgCtx.shadowColor = 'rgba(0,212,170,0.6)';
+  ecgCtx.beginPath();
+
+  for (let x = 0; x < W; x++) {
+    const t = (x / W + ecgT) % 1;
+    const y = mid - ecgVal(t) * amp;
+    x === 0 ? ecgCtx.moveTo(x, y) : ecgCtx.lineTo(x, y);
+  }
+  ecgCtx.stroke();
+  ecgCtx.shadowBlur = 0;
+
+  ecgT += 0.006;
+  ecgRAF = requestAnimationFrame(drawECG);
+}
+
+function stopECG() {
+  if (ecgRAF) cancelAnimationFrame(ecgRAF);
+  ecgRAF = null;
+}
+
+/* ════════════════════════════════════════════
+   HYDRATION CALCULATION
+════════════════════════════════════════════ */
+function calcHydration() {
+  const act  = document.getElementById('act-label').textContent;
+  const temp = SS.temp.last;
+  const bpm  = SS.pulse.last;
+
+  let score = 0;
+  if (act === 'HIGH') score += 2; else if (act === 'MODERATE') score += 1;
+  if (temp !== null) { if (temp > 39.5) score += 2; else if (temp > 39.0) score += 1; } else score += 0.5;
+  if (bpm  !== null) { if (bpm  > 120)  score += 2; else if (bpm  > 100)  score += 1; }
+
+  const data = score <= 1
+    ? { n: 'WELL HYDRATED', icon: '💧', h: 'No concerns — water available nearby.',            cls: 'tg' }
+    : score <= 2
+    ? { n: 'ADEQUATE',      icon: '💧', h: 'Ensure water is accessible and fresh.',            cls: 'tg' }
+    : score <= 3
+    ? { n: 'MONITOR',       icon: '⚠️', h: 'Encourage water intake — watch closely.',          cls: 'ta' }
+    : { n: 'DEHYDRATED',    icon: '🆘', h: 'Immediate water needed — alert vet now.',          cls: 'tr' };
+
+  document.getElementById('hyd-icon').textContent = data.icon;
+  document.getElementById('hyd-name').textContent = data.n;
+  document.getElementById('hyd-name').className = 'hyd-name ' + data.cls;
+  document.getElementById('hyd-hint').textContent = data.h;
+  document.getElementById('hyd-result').style.display = 'block';
+
+  const m = { 'WELL HYDRATED': 'ok', 'ADEQUATE': 'ok', 'MONITOR': 'warn', 'DEHYDRATED': 'crit' };
+  setMetric('hyd', data.n, m[data.n], score > 3 ? 88 : score > 2 ? 58 : score > 1 ? 28 : 8);
+  recalcOverall();
+}
+
+/* ════════════════════════════════════════════
+   METRIC CARDS (Tab 3)
+════════════════════════════════════════════ */
+function setMetric(key, val, status, pct) {
+  const el = document.getElementById('m-'  + key);
+  const mb = document.getElementById('mb-' + key);
+  if (el) { el.textContent = val; el.className = 'mcard-val mv-' + status; }
+  if (mb) { mb.style.width = pct + '%'; mb.className = 'mbar-fill mb-' + status; }
+  const ts = new Date().toLocaleTimeString();
+  document.getElementById('sh-time').textContent    = 'Last updated: ' + ts;
+  document.getElementById('summary-ts').textContent = ts;
+}
+
+/* ════════════════════════════════════════════
+   OVERALL HEALTH STATUS
+════════════════════════════════════════════ */
+function recalcOverall() {
+  const checks = [];
+  if (SS.pulse.last  !== null) checks.push(
+    SS.pulse.last < 50 || SS.pulse.last > 160 ? 'crit' :
+    SS.pulse.last > 140 ? 'warn' : 'ok');
+  if (SS.temp.last   !== null) checks.push(
+    SS.temp.last  > 40.5 || SS.temp.last < 37 ? 'crit' :
+    SS.temp.last  > 39.5 ? 'warn' : 'ok');
+
+  let overall = checks.includes('crit') ? 'crit' : checks.includes('warn') ? 'warn' : checks.length ? 'ok' : 'ok';
+
+  const cfg = {
+    ok:   { h: 'sh-healthy', l: 'sl-healthy', t: 'HEALTHY',  s: 'All monitored vitals within normal range' },
+    warn: { h: 'sh-warning', l: 'sl-warning', t: 'MONITOR',  s: 'One or more values need attention' },
+    crit: { h: 'sh-critical',l: 'sl-critical',t: 'WARNING',  s: 'Abnormal vitals — contact vet immediately' },
+  };
+  const c = cfg[overall];
+  document.getElementById('sh').className = 'status-hero ' + c.h;
+  document.getElementById('sl').className = 'sl ' + c.l;
+  document.getElementById('sl').textContent = c.t;
+  document.getElementById('sh-sub').textContent = c.s;
+
+  const dogName = document.getElementById('dn').textContent;
+  document.getElementById('ngo-summary').textContent =
+    overall === 'ok'   ? `${dogName} (${DOG_ID}) vitals are stable and within normal range. Activity is normal. No immediate veterinary attention required. Suitable for adoption review.` :
+    overall === 'warn' ? `${dogName} (${DOG_ID}) has readings slightly outside optimal range. Ensure fresh water and shade. Consult vet if values persist beyond 30 minutes.` :
+                         `ALERT: ${dogName} (${DOG_ID}) has critical vital readings. Contact the emergency vet listed under About immediately. Do not delay.`;
+}
+
+/* ════════════════════════════════════════════
+   ALERT SYSTEM
+════════════════════════════════════════════ */
+function checkAlert(type, val, ok, hi) {
+  if (ok) return;
+  const msg = !hi
+    ? (type === 'pulse' ? `⚠ Pulse ${val} BPM outside safe range` : `⚠ Temp ${val}°C — fever detected`)
+    : `Note: ${type} slightly elevated (${val})`;
+  const color = hi ? 'var(--amber)' : 'var(--red)';
+  addAlert(msg, color);
+
+  // Trigger collar buzzer + LED via Supabase
+  if (!DEMO) {
+    SB.from('live_control').upsert({
+      dog_id: DOG_ID, buzzer_alert: !hi, led_alert: !hi, updated_at: new Date().toISOString()
+    });
+  }
+}
+
+function addAlert(msg, color = 'var(--amber)') {
+  const log  = document.getElementById('alert-log');
+  const ph   = document.getElementById('alert-placeholder');
+  const item = document.createElement('div');
+  item.className = 'alert-item';
+  item.innerHTML = `
+    <div class="al-dot" style="background:${color}"></div>
+    <div>
+      <div class="al-msg">${msg}</div>
+      <div class="al-time">${new Date().toLocaleTimeString()}</div>
+    </div>`;
+  log.insertBefore(item, ph);
+  setMetric('alerts', 'Active', 'warn', 70);
+}
+
+/* ════════════════════════════════════════════
+   ACTIVITY SIMULATION (background)
+════════════════════════════════════════════ */
+let actBase = 55;
+setInterval(() => {
+  const jitter = (Math.random() - 0.5) * 12;
+  const pct    = Math.min(92, Math.max(8, actBase + jitter));
+  const steps  = 380 + Math.round(Math.random() * 100);
+  document.getElementById('act-bar').style.width = pct + '%';
+  document.getElementById('act-steps').textContent = `~${steps} movements today`;
+  document.getElementById('act-time').textContent  = new Date().toLocaleTimeString();
+
+  const level = pct < 25 ? 'LOW' : pct < 70 ? 'MODERATE' : 'HIGH';
+  document.getElementById('act-label').textContent = level;
+  setMetric('act', level, pct > 75 ? 'warn' : 'ok', pct);
+}, 6000);
+
+/* ════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════ */
+document.getElementById('session-start-el').textContent =
+  'Session started: ' + new Date().toLocaleTimeString();
+
+window.addEventListener('resize', () => {
+  if (SS.pulse.on) { stopECG(); startECG(); }
+});
+</script>
+</body>
+</html>
