@@ -1,0 +1,7 @@
+# Large datasets
+DogMoveData.csv
+activity_features.csv
+
+# Python
+__pycache__/
+*.pyc
