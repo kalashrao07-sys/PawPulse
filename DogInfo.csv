@@ -1,0 +1,46 @@
+DogID,Breed,Weight,Age months,Gender,NeuteringStatus
+16,Crossbreed,13,20,1,0
+18,Belgian Shepherd,29,76,2,0
+19,German Shepherd,30,57,1,0
+20,Border Collie,15,47,1,0
+21,Golden Retriever,39,19,2,0
+22,Beauceron,35,20,2,0
+23,Labrador Retriever,23,113,1,1
+25,Finnish Lapphund,26,88,2,1
+26,Spanish Water Dog,20,47,2,0
+27,Mudi,16,99,2,1
+28,Hovawart,28,109,1,1
+29,Crossbreed,13,32,2,0
+30,Bull Terrier (Miniature),17,31,1,1
+33,Bouvier des Ardennes,23,24,2,0
+34,Smooth Collie,18,98,1,0
+36,Crossbreed,20,95,2,0
+39,Border Collie,15,60,1,0
+41,Belgian Shepherd Malinois,25,22,2,0
+43,Lagotto Romagnolo,14,116,2,0
+44,Crossbreed,19,67,1,1
+45,Lapponian Herder,22,101,2,0
+46,Lapponian Herder,20,64,2,0
+47,Bouvier des Ardennes,22,56,1,1
+48,Labrador Retriever,30,39,2,0
+49,English Springer Spaniel,25,67,2,0
+51,Spanish Water Dog,25,79,2,0
+52,Dutch Shepherd,25,59,1,0
+53,German Shepherd,35,87,1,1
+54,Australian Kelpie,18,20,2,1
+55,Vizsla,25,61,2,1
+56,Border Collie,20,56,1,0
+57,Beauceron,28,52,1,1
+58,Beauceron,28,27,1,0
+59,Border Collie,16,16,2,0
+60,Standard Poodle,31,76,2,1
+61,Hovawart,41,33,2,0
+63,Labrador Retriever,37,30,2,1
+65,Nova Scotia Duck Tolling Retriever,20,84,1,1
+66,Golden Retriever,23,28,1,0
+67,Golden Retriever,28,44,1,0
+68,Flat-Coated Retriever,28,34,1,0
+70,Belgian Shepherd Groenendael,20,85,1,0
+72,Bouvier,30,33,1,0
+73,Dutch Shepherd,23,51,1,0
+74,German Shepherd,32,90,1,1
