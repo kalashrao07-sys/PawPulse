@@ -167,8 +167,17 @@ create table activity_windows (
     accel_var_x               real,
     accel_var_y               real,
     accel_var_z               real,
-    accel_rms                 real,                    -- summary features the server-side
-                                                          -- classifier (Recommendation 1) trains/infers on
+    accel_rms                 real,                    -- kept for cheap dashboard queries
+                                                          -- (e.g. "average activity today");
+                                                          -- NOT the source of truth for inference
+    features                  jsonb,                   -- full feature vector matching the deployed
+                                                          -- model's feature_columns (activity_model.json) --
+                                                          -- source of truth for inference. A jsonb blob
+                                                          -- rather than typed columns because the feature
+                                                          -- set already changed once during model
+                                                          -- development (36 -> 40 when tilt/roll features
+                                                          -- were added); typed columns would need a schema
+                                                          -- migration on every retrain, this doesn't.
     classified_activity       text check (classified_activity in
                                ('resting','standing','walking','trotting','galloping','sniffing','unknown')),
     classification_confidence real,
@@ -176,6 +185,7 @@ create table activity_windows (
 );
 
 create index idx_activity_windows_dog_time on activity_windows (dog_id, window_start desc);
+create index idx_activity_windows_features on activity_windows using gin (features);
 
 
 -- ============================================================================
